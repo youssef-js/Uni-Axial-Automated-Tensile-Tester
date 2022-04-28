@@ -1,9 +1,30 @@
 # Uni-Axial Automated Tensile Tester
  ECE 442 Systems Analysis and Design Final Project
  
+ The University at Albany’s chemistry department, as part of their educational mission, intends to build a laboratory for undergraduate students where they can gain hands on experience testing various material properties (including tensile strength).  However, due to the extremely high cost of commercial products they have been unable to equip such a laboratory.  
+
+The goal of this project is to build an accurate, low cost, easy to use uniaxial tensile strength tester to support this educational mission. 
+
+ 
  
  ### Repository Contents
  
+ In the interest of transparency all project reports have been included. Reading through this documentation will provide an individual with information on key milestones that were achieved during the progressive evolution of the product. Specifically the "Reports" folder contains the following: 
+ 
+ * Logical Design Report
+ * Physical Design Report
+ * Experimental Results Report 
+
+ Furthermore, within the "Presentations" folder viewers have been provided with a final copy of the poster displayed at the undergraduate research conference. As well as the presentation slides utilized within the classroom setting that exemplify the accomplished work within a condensed format.
+ 
+ 
+ Lastly, in the scenario were an individual may wish to replicate the design we have provided the source code that is used to control the logic behind the device. Stl files have also been included, these can be found within the "Misc" folder. When printed the 3D models will yield the following:
+ 
+ * Clamps
+ * LCD Case
+ * Keypad Case
+
+Moreover, within the same folder will be a link to a webpage that will contain an appropriate training guide and more information on the apparatus.
  
   ### System Parts
   
@@ -89,28 +110,46 @@
   
    ### Software Dependencies
    
-   In the context of software dependencies there is none for the traditional user. This apparatus requires no external downloads and should 
+   In the context of software dependencies there is none for the traditional user. This apparatus requires no external downloads and is advertised as a complete stand-alone product due to the microSD functionality allowing for an individual to interact with data from the device in the form of a txt file. As such, appropriate data analysis can be performed at the users discretion, it is anticipated that for chemistry students excel will be the preferred tool.
    
-   utilizes the use of a microSD breakout board, as such once a test has been executed the respective data will be stored as a txt file on the microSD. The
+However, when initially setting up the device one must upload the source code onto the microcontroller. The first step is to download the Arduino IDE, the appropriate link is found below:
+
+Link: https://www.arduino.cc/en/software
+
+Next, it is important that the required libraries for the provided Arduino source code are properly configured. The procedure for doing so is concisely formatted below:
+
+
+   Utilize Link --> Press "Code" Button --> Download the ZIP --> Extract files into the "libraries" folder for Arduino.
+
+
+   -HX711_ADC Library
    
-   
-   
-   Required Libraries for Arduino Code
-   
-   Utilize Link --> Press Code --> Download the ZIP --> Extract files into the "libraries" folder for Arduino.
-   
-   HX711_ADC Library
    Link: https://github.com/olkal/HX711_ADC
    
-   LiquidCrystal_I2C Library
+   -LiquidCrystal_I2C Library
+  
    Link: https://github.com/johnrickman/LiquidCrystal_I2C
+   
+   -Keypad Library
+  
+   Link: https://github.com/Chris--A/Keypad
+   
+   -EEPROM Library
+  
+   Link: N/A (Built into Arduino IDE)
+   
+   -Wire Library
+  
+   Link: N/A (Built into Arduino IDE)
+   
+   -SD and SPI Library
+  
+   Link: N/A (Built into Arduino IDE)
 
 
+Syntax to reference libraries:
 
-
-Use the following include statements to account for
-
-
+(Provided for the readers understanding, these lines of code have already been included within the source code and there is no need for the user to make any additions.)
 ```C
 // Load cell
 #include <HX711_ADC.h>
@@ -127,3 +166,28 @@ Use the following include statements to account for
 #include <SD.h>
 #include <SPI.h>
 ```
+
+At this stage the setup in terms of software has been completed. Please download the source code provided within this repository and upload to the microcontroller to begin using the apparatus.
+
+### Personnel and Funding
+
+This project is completely funded by the Center For Undergraduate Research And Creative Engagement (CURCE). The designers applied for a $500 award and were subsequently granted the sum after passing the validation process. 
+
+Designers
+
+1. Youssef Jalwaj Soubai
+
+2. Mazin Chater
+
+3. Jaden Pharoah
+
+Faculty Mentors/Support
+
+1. Jonathan Muckell
+
+2. Mike Denmark
+
+Special thanks to Professor Chen, Feldblyun, Yeung, and the University at Albany’s Chemistry Department for sponsoring this project. 
+
+Developed in ECE442: Systems Analysis & Design in the Electrical & Computer Engineering Department. 
+
