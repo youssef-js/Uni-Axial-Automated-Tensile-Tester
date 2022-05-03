@@ -20,7 +20,7 @@ char keys[ROWS][COLS] = {
   {'t', '0', '#', 'D'}
 };
 
-// connect the pins from left to right to pin 22,23,24,25,26,27,28,29
+// Keypad mappings
 byte rowPins[ROWS] = {26, 27, 28, 29}; //connect to the row pinouts of the keypad
 byte colPins[COLS] = {22, 23, 24, 25}; //connect to the column pinouts of the keypad
 
@@ -33,8 +33,9 @@ char inByte;
 #include <SPI.h>
 File myFile;
 int pinCS = 53;
+int counter = 0;
 
-//Time Functionality to calculate actuator distance
+// Time Functionality to calculate actuator distance
 unsigned long Reference_Time = 0;
 unsigned long Current_Time = 0;
 unsigned long Time_Difference = 0;
@@ -65,7 +66,7 @@ void setup() {
 
   Serial.begin(9600);
 
-  //LCD
+  // Initialize LCD
   lcd.init();
   lcd.backlight();
   lcd.clear();
@@ -113,20 +114,53 @@ void setup() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// Actuator movements
+void delayActuator() {
+  digitalWrite(Retract, LOW);
+  digitalWrite(Extend, LOW);
+  delay(3000);
+}
+
+void stopActuator() {
+  digitalWrite(Retract, LOW);
+  digitalWrite(Extend, LOW);
+}
+
+void extendActuator() {
+  digitalWrite(Retract, LOW);
+  digitalWrite(Extend, HIGH);
+  delay(42000);
+}
+
+void retractActuator() {
+  digitalWrite(Retract, HIGH);
+  digitalWrite(Extend, LOW);
+}
+
+// Prints base menu screen 
+void printMenu() {
+  lcd.clear();
+  lcd.print("Auto Tensile Tester");
+  lcd.setCursor(0, 1);
+  lcd.print("------------------------");
+  lcd.setCursor(0, 2);
+  lcd.print("A)Calibrate");
+  lcd.setCursor(0, 3);
+  lcd.print("B)Run Test");
+}
+
 // Gets instantaneous data reading of load cell
 double readLoadCell() {
 
-  //Load Cell
   static boolean newDataReady = 0;
-  const int serialPrintInterval = 0; //increase value to slow down serial print activity
   float cell = 0;
 
-  // check for new data/start next conversion:
+  // Check for new data/start next conversion:
   if (LoadCell.update()) newDataReady = true;
 
   // get smoothed value from the dataset:
   if (newDataReady) {
-    if (millis() > t + serialPrintInterval) {
+    if (millis() > t) {
       cell = LoadCell.getData();
       newDataReady = 0;
       t = millis();
@@ -277,30 +311,6 @@ void calibrate() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void delayActuator() {
-  digitalWrite(Retract, LOW);
-  digitalWrite(Extend, LOW);
-  delay(3000);
-}
-
-void stopActuator() {
-  digitalWrite(Retract, LOW);
-  digitalWrite(Extend, LOW);
-}
-
-void extendActuator() {
-  digitalWrite(Retract, LOW);
-  digitalWrite(Extend, HIGH);
-  delay(42000);
-}
-
-void retractActuator() {
-  digitalWrite(Retract, HIGH);
-  digitalWrite(Extend, LOW);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void loop() {
 
   double loadcell = 0;
@@ -364,7 +374,7 @@ void loop() {
   char key = keypad.getKey();
   Serial.print("key: ");
   Serial.println(key);
-  delay(100);
+  //delay(100);
 
 }
 
@@ -375,19 +385,11 @@ void FSM() {
   // Transitions
   switch (state) {
     case START:
+      printMenu();
       state = MENU;
       break;
 
     case MENU:
-
-      lcd.clear();
-      lcd.print("Auto Tensile Tester");
-      lcd.setCursor(0, 1);
-      lcd.print("------------------------");
-      lcd.setCursor(0, 2);
-      lcd.print("A)Calibrate");
-      lcd.setCursor(0, 3);
-      lcd.print("B)Run Test");
 
       delay(100);
 
@@ -398,20 +400,26 @@ void FSM() {
         lcd.clear();
         lcd.print("RUN STATE");
         lcd.setCursor(0, 1);
-        lcd.print("---------------------");
+        lcd.print("--------------------");
         lcd.setCursor(0, 2);
         lcd.print("Press 'c' to stop");
         lcd.setCursor(0, 3);
-        lcd.print("once the specimen breaks.");
+        lcd.print("when break occurs.");
         lcd.setCursor(0, 4);
 
         delayActuator();
         retractActuator();
-
-        //Removes previous data and prepares for new test
-        SD.remove("newTest.txt");
+        
         // Create/Open file
-        myFile = SD.open("newTest.txt", FILE_WRITE);
+     
+        char filename[32] = "test";
+        char cntStr[16];
+        itoa(counter, cntStr, 10);
+        counter++;
+        strcat(filename, cntStr);
+        strcat(filename, ".txt");
+        
+        myFile = SD.open(filename, FILE_WRITE);
         Reference_Time = millis(); //Obtain Time when run starts
         state = RUN;
         Serial.println("State is run");
@@ -429,6 +437,9 @@ void FSM() {
       if (endCalibrateFlag == 1) {
         endCalibrateFlag = 0;
         calibrateFlag = 0;
+
+        printMenu();
+
         state = MENU;
       }
       break;
@@ -442,6 +453,9 @@ void FSM() {
         delayActuator(); // Stops the actuator and waits 3s
         extendActuator(); // Extends back to bottom position
         stopActuator(); // Stops actuator
+
+        printMenu();
+
         state = MENU;
       }
       // If no state change
@@ -465,7 +479,6 @@ void FSM() {
       break;
 
     case RUN:
-      Serial.println("RUN: Setting runFlag to 1");
       runFlag = 1;
       break;
   }
@@ -491,5 +504,4 @@ void keypadEvent(KeypadEvent key) {
       }
       break;
   }
-
 }
